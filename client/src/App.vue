@@ -3,7 +3,8 @@
     <select name="" id="" >
       <option v-for="project in projects" :key="project.id" :value="project.id">{{project.name}}</option>
     </select>
-    <button>添加项目</button>
+    <button>修改</button>
+    <button>添加</button>
     <HelloWorld :tasks="tasks"/>
   </div>
 </template>
