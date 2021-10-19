@@ -1,12 +1,19 @@
 <template>
   <div class="tasks">
+    <select name="" id="">
+      <option v-for="project in projects" :key="project.id" :value="project.id">
+        {{ project.name }}
+      </option>
+    </select>
     <ul>
       <li v-for="task in tasks" :key="task.id" :class="task.condition">
         <div class="task">
-          <h2>{{ task.title }}
-          <button>完成</button>
-          <button>修改</button>
-          <button>删除</button></h2>
+          <h2>
+            {{ task.title }}
+            <button>完成</button>
+            <button>修改</button>
+            <button>删除</button>
+          </h2>
           <span>{{ task.date }}</span>
         </div>
       </li>
@@ -20,6 +27,12 @@ export default {
   name: "TaskList",
   props: {
     tasks: {
+      type: Array,
+      default() {
+        return ["暂无数据"];
+      },
+    },
+    projects: {
       type: Array,
       default() {
         return ["暂无数据"];

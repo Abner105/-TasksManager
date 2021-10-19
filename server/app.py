@@ -59,19 +59,33 @@ def forge():
     click.echo('Done')
 
 
-@app.route('/')
-def hello():
+@app.route('/gettasks',methods=['GET','POST'])
+def gettasks():
     tasks = []
     ts = Tasks.query.filter_by(pid=2).all()
     for t in ts:
         d = datetime.datetime.strftime(t.date, "%Y-%m-%d")
-        r = {'title':t.title,'date':d,'condition':t.condition,'pid':t.pid}
+        r = {'id':t.id,'title':t.title,'date':d,'condition':t.condition,'pid':t.pid}
         tasks.append(r)
     print(tasks)
     res = make_response(json.dumps(tasks))
     res.headers['Content-Type'] = 'application/json; charset=utf-8'
     res.status = '200'
     return res
+
+@app.route('/getprojects')
+def getprojects():
+    ps = Projects.query.all()
+    projects = []
+    for p in ps:
+        r = {'id':p.id,'name':p.name}
+        projects.append(r)
+    print(projects)
+    res = make_response(json.dumps(projects))
+    res.headers['Content-Type'] = 'application/json; charset=utf-8'
+    res.headers['Access-Control-Allow-Origin'] = '*'
+    res.status = '200'
+    return res
 #
-# if __name__ == '__main__':
-#     app.run()
+if __name__ == '__main__':
+    app.run()

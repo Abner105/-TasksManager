@@ -1,41 +1,31 @@
 <template>
   <div id="app">
-    <select name="" id="" >
-      <option v-for="project in projects" :key="project.id" :value="project.id">{{project.name}}</option>
-    </select>
-    <button>修改</button>
-    <button>添加</button>
-    <HelloWorld :tasks="tasks"/>
+    <!-- <button>修改</button>
+    <button>添加</button> -->
+    <router-link to="/tasks">任务列表</router-link>
+    <router-link to="/projects">管理项目</router-link>
+    <!-- <HelloWorld :tasks="tasks"/> -->
+    <router-view :tasks="tasks" :projects="projects" />
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/TaskList.vue'
 export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  },
-  data(){
+  name: "App",
+  data() {
     return {
-      projects:[
-        {id:1,name:'项目1'},
-        {id:2,name:'项目2'},
-        {id:3,name:'项目3'},
-      ],
-      tasks:[
-        {id:2,title:'逛公园',date:'10月13日',condition:'todo'},
-        {id:1,title:'完成游戏',date:'10月12日',condition:'todo'},
-        {id:3,title:'吃饭',date:'10月15日',condition:'done'},
-        {id:4,title:'上王者',date:'10月16日',condition:'done'},
-      ]
+      projects:'',
+      tasks:'',
     }
+  },
+  created(){
+    
   }
-}
+};
 </script>
 
 <style>
-*{
+* {
   list-style: none;
   margin: 0;
   padding: 0;
