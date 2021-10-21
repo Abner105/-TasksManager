@@ -1,7 +1,8 @@
 import datetime
 
-from flask import Flask,make_response
+from flask import Flask,make_response,request
 from flask_sqlalchemy import SQLAlchemy
+
 import os,json,click
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
@@ -43,14 +44,14 @@ def forge():
     # 向任务表中插入数据
     n = datetime.datetime.now()
     tasks=[
-        {'title':'逛公园','date':n,'condition':'todo','pid':1,'sort':1},
-        {'title':'完成游戏','date':n,'condition':'todo','pid':1,'sort':2},
-        {'title':'吃饭','date':n,'condition':'done','pid':1,'sort':3},
-        {'title':'上王者','date':n,'condition':'done','pid':1,'sort':4},
-        {'title': '撸猫', 'date': n, 'condition': 'todo', 'pid': 2,'sort':5},
-        {'title': '看电视剧', 'date': n, 'condition': 'todo', 'pid': 2,'sort':6},
-        {'title': '逛街', 'date': n, 'condition': 'done', 'pid': 2,'sort':7},
-        {'title': '去XX景区', 'date': n, 'condition': 'done', 'pid': 3,'sort':8},
+        {'title':'项目1-任务1','date':n,'condition':'todo','pid':1,'sort':1},
+        {'title':'项目1-任务2','date':n,'condition':'todo','pid':1,'sort':2},
+        {'title':'项目1-任务3','date':n,'condition':'done','pid':1,'sort':3},
+        {'title':'项目1-任务4','date':n,'condition':'done','pid':1,'sort':4},
+        {'title': '项目2-任务1', 'date': n, 'condition': 'todo', 'pid': 2,'sort':5},
+        {'title': '项目2-任务2', 'date': n, 'condition': 'todo', 'pid': 2,'sort':6},
+        {'title': '项目2-任务3', 'date': n, 'condition': 'done', 'pid': 2,'sort':7},
+        {'title': '项目3-任务1', 'date': n, 'condition': 'done', 'pid': 3,'sort':8},
     ]
     for t in tasks:
         task = Tasks(title=t['title'],date=t['date'],condition=t['condition'],pid=t['pid'],sort=t['sort'])
@@ -59,33 +60,77 @@ def forge():
     click.echo('Done')
 
 
-@app.route('/gettasks',methods=['GET','POST'])
+# 获取任务列表
+@app.route('/gettasks',methods=['POST','OPTIONS'])
 def gettasks():
+    data = request.json
+    # print(data)
     tasks = []
-    ts = Tasks.query.filter_by(pid=2).all()
-    for t in ts:
-        d = datetime.datetime.strftime(t.date, "%Y-%m-%d")
-        r = {'id':t.id,'title':t.title,'date':d,'condition':t.condition,'pid':t.pid}
-        tasks.append(r)
-    print(tasks)
+    if data:
+        data = data['id']
+        ts = Tasks.query.filter_by(pid=data).all()
+        for t in ts:
+            # 将数据库中的时间切割为年月日的格式
+            d = datetime.datetime.strftime(t.date, "%Y-%m-%d")
+            r = {'id':t.id,'title':t.title,'date':d,'condition':t.condition,'pid':t.pid}
+            tasks.append(r)
+    # print(tasks)
     res = make_response(json.dumps(tasks))
     res.headers['Content-Type'] = 'application/json; charset=utf-8'
+    res.headers['Access-Control-Allow-Origin'] = '*'
+    res.headers["Access-Control-Allow-Headers"] = "x-requested-with,Content-Type"
     res.status = '200'
     return res
 
-@app.route('/getprojects')
+
+# 获取所有项目
+@app.route('/getprojects',methods=['POST'])
 def getprojects():
     ps = Projects.query.all()
     projects = []
     for p in ps:
         r = {'id':p.id,'name':p.name}
         projects.append(r)
-    print(projects)
+    # print(projects)
     res = make_response(json.dumps(projects))
     res.headers['Content-Type'] = 'application/json; charset=utf-8'
     res.headers['Access-Control-Allow-Origin'] = '*'
     res.status = '200'
     return res
+
+
+# 添加任务
+@app.route('/addtask',methods=['POST','OPTIONS'])
+def addtask():
+    data = request.json
+    if data:
+        n = datetime.datetime.now()
+        task = Tasks(title=data['title'],date=n,condition='todo',pid=data['pid'],sort=0)
+        db.session.add(task)
+        db.session.commit()
+    res = make_response(json.dumps([{'msg':'添加任务成功'}]))
+    res.headers['Content-Type'] = 'application/json; charset=utf-8'
+    res.headers['Access-Control-Allow-Origin'] = '*'
+    res.headers["Access-Control-Allow-Headers"] = "x-requested-with,Content-Type"
+    res.status = '200'
+    return res
+
+
+# 添加项目
+@app.route('/addproject',methods=['POST','OPTIONS'])
+def addproject():
+    data = request.json
+    if data:
+        project = Projects(name=data['name'])
+        db.session.add(project)
+        db.session.commit()
+    res = make_response(json.dumps([{'msg':'添加项目成功'}]))
+    res.headers['Content-Type'] = 'application/json; charset=utf-8'
+    res.headers['Access-Control-Allow-Origin'] = '*'
+    res.headers["Access-Control-Allow-Headers"] = "x-requested-with,Content-Type"
+    res.status = '200'
+    return res
+
 #
 if __name__ == '__main__':
     app.run()

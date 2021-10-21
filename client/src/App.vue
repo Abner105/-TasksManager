@@ -1,26 +1,47 @@
 <template>
   <div id="app">
-    <!-- <button>修改</button>
-    <button>添加</button> -->
+    <!-- 引入两个前端路由 -->
     <router-link to="/tasks">任务列表</router-link>
     <router-link to="/projects">管理项目</router-link>
-    <!-- <HelloWorld :tasks="tasks"/> -->
-    <router-view :tasks="tasks" :projects="projects" />
+    <!-- 向子组件传入数据，并监听子组件中的addproject事件 -->
+    <router-view :tasks="tasks" :projects="projects" @addproject="refresh"/>
   </div>
 </template>
 
 <script>
+import axios from "axios";
 export default {
   name: "App",
   data() {
     return {
-      projects:'',
-      tasks:'',
+      projects: [],
+      tasks: [],
+    };
+  },
+  methods:{
+    // 获取子组件传递的项目列表
+    refresh(p){
+      this.projects = p
     }
   },
-  created(){
-    
-  }
+  // 获取初始值
+  created() {
+    // 获取项目
+    axios({
+      method: "post",
+      url: " http://127.0.0.1:5000/getprojects",
+    }).then((res) => {
+      this.projects = res.data;
+      // 获取任务列表，默认获取第一个项目的任务列表
+      axios({
+        method: "post",
+        url: "http://127.0.0.1:5000/gettasks",
+        data: {id:res.data[0].id},
+      }).then((res) => {
+        this.tasks = res.data;
+      });
+    });
+  },
 };
 </script>
 
