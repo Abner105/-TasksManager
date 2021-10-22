@@ -2,7 +2,7 @@
   <div class="projects">
     <div v-for="project in p" :key="project.id">
       <input type="text" :value="project.name" />
-      <button>删除</button>
+      <button @click="delproject(project.id)">删除</button>
     </div>
     <!-- 引入弹窗组件，并监听弹窗中的确定事件 -->
     <alert-pane @itemclick="fclick"></alert-pane>
@@ -43,6 +43,22 @@ export default {
         method: "post",
         url: "http://127.0.0.1:5000/addproject",
         data: { name },
+      }).then(() => {
+        axios({
+          method: "post",
+          url: "http://127.0.0.1:5000/getprojects",
+        }).then((res) => {
+          // 向父组件中传递刷新后的项目列表
+          this.$emit("addproject", res.data);
+        });
+      });
+    },
+    // 删除项目
+    delproject(pid) {
+      axios({
+        method: "post",
+        url: "http://127.0.0.1:5000/delproject",
+        data: { id:pid },
       }).then(() => {
         axios({
           method: "post",

@@ -4,7 +4,14 @@
     <router-link to="/tasks">任务列表</router-link>
     <router-link to="/projects">管理项目</router-link>
     <!-- 向子组件传入数据，并监听子组件中的addproject事件 -->
-    <router-view :tasks="tasks" :projects="projects" @addproject="refresh"/>
+    <keep-alive include="TaskList">
+      <router-view
+        :tasks="tasks"
+        :projects="projects"
+        :fpid="fpid"
+        @addproject="refresh"
+      />
+    </keep-alive>
   </div>
 </template>
 
@@ -16,13 +23,26 @@ export default {
     return {
       projects: [],
       tasks: [],
+      fpid: 1,
     };
   },
-  methods:{
+  methods: {
     // 获取子组件传递的项目列表
-    refresh(p){
-      this.projects = p
-    }
+    refresh(p) {
+      this.projects = p;
+      if (p[0]) {
+        this.fpid = p[0].id;
+        axios({
+          method: "post",
+          url: "http://127.0.0.1:5000/gettasks",
+          data: { id: this.fpid },
+        }).then((res) => {
+          this.tasks = res.data;
+        });
+      } else {
+        this.tasks = [];
+      }
+    },
   },
   // 获取初始值
   created() {
@@ -31,15 +51,20 @@ export default {
       method: "post",
       url: " http://127.0.0.1:5000/getprojects",
     }).then((res) => {
-      this.projects = res.data;
-      // 获取任务列表，默认获取第一个项目的任务列表
-      axios({
-        method: "post",
-        url: "http://127.0.0.1:5000/gettasks",
-        data: {id:res.data[0].id},
-      }).then((res) => {
-        this.tasks = res.data;
-      });
+      if (res.data[0]) {
+        console.log(res.data);
+        this.projects = res.data;
+        this.fpid = res.data[0].id;
+        // console.log(typeof this.pid)
+        // 获取任务列表，默认获取第一个项目的任务列表
+        axios({
+          method: "post",
+          url: "http://127.0.0.1:5000/gettasks",
+          data: { id: this.fpid },
+        }).then((res) => {
+          this.tasks = res.data;
+        });
+      }
     });
   },
 };

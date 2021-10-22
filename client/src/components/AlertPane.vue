@@ -4,8 +4,8 @@
   <button @click="show=true">添加</button>
   <div class="wrapper" v-show="show">
     <div class="alertp">
-      <input type="text" v-model="msg" placeholder="请输入"/>
-      <button @click="sclick(msg)">确定</button>
+      <input type="text" v-model="msg" placeholder="请输入" @keyup.enter="sclick(msg)"/>
+      <button @click="sclick(msg)" >确定</button>
       <button @click="show=false">取消</button>
     </div>
   </div>
