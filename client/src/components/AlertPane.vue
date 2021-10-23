@@ -1,35 +1,62 @@
 // 弹窗组件
 <template>
-<div>
-  <button @click="show=true">添加</button>
-  <div class="wrapper" v-show="show">
-    <div class="alertp">
-      <input type="text" v-model="msg" placeholder="请输入" @keyup.enter="sclick(msg)"/>
-      <button @click="sclick(msg)" >确定</button>
-      <button @click="show=false">取消</button>
+  <div>
+    <button @click="show = true">{{ btntext }}</button>
+    <div class="wrapper" v-show="show">
+      <div class="alertp">
+        <h3>{{hint}}</h3>
+        <input
+          type="text"
+          v-model="msg"
+          :placeholder="hint"
+          @keyup.enter="sclick(msg)"
+          v-focus="true"
+        />
+        <button @click="sclick(msg)">确定</button>
+        <button @click="show = false">取消</button>
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
 export default {
   name: "AlertPane",
-  data(){
-    return {
-      show:false, // 用于判断是否显示
-      msg:''
-    }
+  // 设置父组件传入的个性值
+  props: {
+    btntext: {
+      type: String,
+      default: "添加",
+    },
+    hint: {
+      type: String,
+      default: "请输入",
+    },
   },
-  methods:{
+  data() {
+    return {
+      show: false, // 用于判断是否显示
+      msg: "",
+    };
+  },
+  methods: {
     // 弹窗组件中的“确定”点击事件
-    sclick(msg){
-      this.$emit('itemclick',msg)
-      this.show = false
+    sclick(msg) {
+      this.$emit("itemclick", msg);
+      this.show = false;
       // 将输入框中的内容清空
-      this.msg = ''
-    }
-  }
+      this.msg = "";
+    },
+  },
+  directives: {
+    focus: {
+      update: function (el, { value }) {
+        if (value) {
+          el.focus();
+        }
+      },
+    },
+  },
 };
 </script>
 
@@ -51,7 +78,6 @@ export default {
   background-color: #fff;
 }
 .alertp input {
-  margin:30px auto 10px;
+  margin: 10px auto 10px;
 }
-
 </style>

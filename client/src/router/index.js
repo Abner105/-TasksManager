@@ -6,16 +6,16 @@ Vue.use(VueRouter)
 const routes = [
     {
         path: '',
-        redirect: '/tasks'
+        redirect: '/taskmanager'
     },
-    {
-        path: '/tasks',
-        component: Tasks,
-    },
-    {
-        path: '/projects',
-        component: Projects,
-    }
+    // {
+    //     path: '/taskmanager',
+    //     component: Tasks,
+    // },
+    // {
+    //     path: '/projects',
+    //     component: Projects,
+    // }
 ]
 const router = new VueRouter({
     routes,

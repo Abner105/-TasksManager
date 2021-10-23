@@ -84,8 +84,13 @@ def addproject():
     if data:
         project = Projects(name=data['name'])
         db.session.add(project)
+        db.session.flush()
+        pid = project.id
+        print(pid)
         db.session.commit()
-    res = make_response(json.dumps([{'msg':'添加项目成功'}]))
+        res = make_response(json.dumps([{'id':pid}]))
+    else:
+        res = make_response(json.dumps([{'msg':'请稍等'}]))
     res.headers['Content-Type'] = 'application/json; charset=utf-8'
     res.headers['Access-Control-Allow-Origin'] = '*'
     res.headers["Access-Control-Allow-Headers"] = "x-requested-with,Content-Type"
@@ -107,6 +112,22 @@ def delproject():
             db.session.delete(task)
         db.session.commit()
     res = make_response(json.dumps([{'msg':'成功删除项目'}]))
+    res.headers['Content-Type'] = 'application/json; charset=utf-8'
+    res.headers['Access-Control-Allow-Origin'] = '*'
+    res.headers["Access-Control-Allow-Headers"] = "x-requested-with,Content-Type"
+    res.status = '200'
+    return res
+
+
+# 修改项目
+@app.route('/alterproject',methods=['POST','OPTIONS'])
+def alterproject():
+    data = request.json
+    if data:
+        project = Projects.query.get(data['id'])
+        project.name = data['name']
+        db.session.commit()
+    res = make_response(json.dumps([{'msg':'修改项目成功'}]))
     res.headers['Content-Type'] = 'application/json; charset=utf-8'
     res.headers['Access-Control-Allow-Origin'] = '*'
     res.headers["Access-Control-Allow-Headers"] = "x-requested-with,Content-Type"
@@ -201,6 +222,22 @@ def toptask():
         task.sort = newsort
         db.session.commit()
     res = make_response(json.dumps([{'msg':'置顶任务成功'}]))
+    res.headers['Content-Type'] = 'application/json; charset=utf-8'
+    res.headers['Access-Control-Allow-Origin'] = '*'
+    res.headers["Access-Control-Allow-Headers"] = "x-requested-with,Content-Type"
+    res.status = '200'
+    return res
+
+
+# 修改任务
+@app.route('/altertask',methods=['POST','OPTIONS'])
+def altertask():
+    data = request.json
+    if data:
+        task = Tasks.query.get(data['id'])
+        task.title = data['title']
+        db.session.commit()
+    res = make_response(json.dumps([{'msg':'修改任务成功'}]))
     res.headers['Content-Type'] = 'application/json; charset=utf-8'
     res.headers['Access-Control-Allow-Origin'] = '*'
     res.headers["Access-Control-Allow-Headers"] = "x-requested-with,Content-Type"

@@ -1,38 +1,40 @@
 // 任务列表组件
 <template>
   <div class="tasks">
-    
-    <div v-if="Boolean(projects[0])">
-      <select name="" id="" @change="switchProject" v-model="pid">
-        <option
-          v-for="project in projects"
-          :key="project.id"
-          :value="project.id"
-        >
-          {{ project.name }}
-        </option>
-      </select>
+    <h2>任务列表</h2>
+    <!-- 引入弹窗组件，并监听弹窗中的确定事件 -->
+    <alert-pane
+      @itemclick="fclick"
+      :btntext="'+添加任务'"
+      :hint="'请输入任务内容'"
+    ></alert-pane>
+    <div v-if="stasks[0]">
       <ul>
-        <li v-for="task in t" :key="task.id" :class="task.condition">
+        <li v-for="task in stasks" :key="task.id" :class="task.condition">
           <div class="task">
-            <h2>
-              <!-- <input type="text" :value="task.title"> -->
+            <h3 @click="chose(task.id)" v-show="ischose != task.id">
               {{ task.title }}
-              <button @click="done(task.id)" v-if="task.condition == 'todo'">
-                完成
-              </button>
-              <button @click="toptask(task.id)">置顶</button>
-              <button @click="deltask(task.id)">删除</button>
-            </h2>
+            </h3>
+            <input
+              v-show="ischose == task.id"
+              type="text"
+              :value="task.title"
+              v-focus="focusstatus"
+              id="input"
+              @blur="altertask(task, $event)"
+              @keyup.enter="altertask(task, $event)"
+            />
+            <button @click="done(task.id)" v-if="task.condition == 'todo'">
+              完成
+            </button>
+            <button @click="toptask(task.id)">置顶</button>
+            <button @click="deltask(task.id)">删除</button>
             <span>{{ task.date }}</span>
           </div>
         </li>
       </ul>
-      <!-- 引入弹窗组件，并监听弹窗中的确定事件 -->
-      <alert-pane @itemclick="fclick"></alert-pane>
     </div>
     <div v-else>暂无数据</div>
-
   </div>
 </template>
 
@@ -50,12 +52,6 @@ export default {
         return [];
       },
     },
-    projects: {
-      type: Array,
-      default() {
-        return [];
-      },
-    },
     fpid: {
       type: Number,
       default: 1,
@@ -63,29 +59,21 @@ export default {
   },
   data() {
     return {
-      t: this.tasks,
+      stasks: this.tasks,
       pid: this.fpid,
+      ischose: 0,
+      focusstatus: false,
     };
   },
   watch: {
     tasks(val) {
-      this.t = val;
+      this.stasks = val;
     },
     fpid(val) {
       this.pid = val;
     },
   },
   methods: {
-    // 监听切换项目，获取该项目下的任务
-    switchProject() {
-      axios({
-        method: "post",
-        url: "http://127.0.0.1:5000/gettasks",
-        data: { id: this.pid },
-      }).then((res) => {
-        this.t = res.data;
-      });
-    },
     // 监听弹窗中的确定事件,添加任务并刷新任务列表
     fclick(title) {
       axios({
@@ -98,7 +86,7 @@ export default {
           url: "http://127.0.0.1:5000/gettasks",
           data: { id: this.pid },
         }).then((res) => {
-          this.t = res.data;
+          this.stasks = res.data;
         });
       });
     },
@@ -114,7 +102,7 @@ export default {
           url: "http://127.0.0.1:5000/gettasks",
           data: { id: this.pid },
         }).then((res) => {
-          this.t = res.data;
+          this.stasks = res.data;
         });
       });
     },
@@ -130,7 +118,7 @@ export default {
           url: "http://127.0.0.1:5000/gettasks",
           data: { id: this.pid },
         }).then((res) => {
-          this.t = res.data;
+          this.stasks = res.data;
         });
       });
     },
@@ -146,9 +134,46 @@ export default {
           url: "http://127.0.0.1:5000/gettasks",
           data: { id: this.pid },
         }).then((res) => {
-          this.t = res.data;
+          this.stasks = res.data;
         });
       });
+    },
+    // 切换为输入框,并自动获取焦点
+    chose(id) {
+      this.ischose = id;
+      this.focusstatus = true;
+      const obj = document.getElementById("input");
+      obj.selectionStart = obj.value.length;
+      obj.selectionEnd = obj.value.length;
+    },
+    // 修改任务
+    altertask(t, e) {
+      this.ischose = 0;
+      this.focusstatus = false;
+      if (t.title != e.target.value) {
+        axios({
+          method: "post",
+          url: "http://127.0.0.1:5000/altertask",
+          data: { id: t.id , title:e.target.value},
+        }).then((res) => {
+          axios({
+            method: "post",
+            url: "http://127.0.0.1:5000/gettasks",
+            data: { id: this.pid },
+          }).then((res) => {
+            this.stasks = res.data;
+          });
+        });
+      }
+    },
+  },
+  directives: {
+    focus: {
+      update: function (el, { value }) {
+        if (value) {
+          el.focus();
+        }
+      },
     },
   },
 };

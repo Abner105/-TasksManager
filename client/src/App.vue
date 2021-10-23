@@ -1,24 +1,24 @@
 <template>
   <div id="app">
-    <!-- 引入两个前端路由 -->
-    <router-link to="/tasks">任务列表</router-link>
-    <router-link to="/projects">管理项目</router-link>
-    <!-- 向子组件传入数据，并监听子组件中的addproject事件 -->
-    <keep-alive include="TaskList">
-      <router-view
-        :tasks="tasks"
-        :projects="projects"
-        :fpid="fpid"
-        @addproject="refresh"
-      />
-    </keep-alive>
+    <project-list
+      :projects="projects"
+      :fpid="fpid"
+      @refresh="fswitch"
+    ></project-list>
+    <task-list :fpid="fpid" :tasks="tasks"></task-list>
   </div>
 </template>
 
 <script>
 import axios from "axios";
+import ProjectList from "./components/ProjectList.vue";
+import TaskList from "./components/TaskList.vue";
 export default {
   name: "App",
+  components: {
+    ProjectList,
+    TaskList,
+  },
   data() {
     return {
       projects: [],
@@ -27,21 +27,16 @@ export default {
     };
   },
   methods: {
-    // 获取子组件传递的项目列表
-    refresh(p) {
-      this.projects = p;
-      if (p[0]) {
-        this.fpid = p[0].id;
-        axios({
-          method: "post",
-          url: "http://127.0.0.1:5000/gettasks",
-          data: { id: this.fpid },
-        }).then((res) => {
-          this.tasks = res.data;
-        });
-      } else {
-        this.tasks = [];
-      }
+    // 子组件切换项目
+    fswitch(e) {
+      this.fpid = e;
+      axios({
+        method: "post",
+        url: "http://127.0.0.1:5000/gettasks",
+        data: { id: this.fpid },
+      }).then((res) => {
+        this.tasks = res.data;
+      });
     },
   },
   // 获取初始值
@@ -55,8 +50,7 @@ export default {
         console.log(res.data);
         this.projects = res.data;
         this.fpid = res.data[0].id;
-        // console.log(typeof this.pid)
-        // 获取任务列表，默认获取第一个项目的任务列表
+        // 获取第一个项目的任务列表
         axios({
           method: "post",
           url: "http://127.0.0.1:5000/gettasks",
@@ -83,6 +77,11 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  margin: 60px auto;
+  width: 500px;
+  height: 600px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
 }
 </style>
