@@ -1,17 +1,23 @@
 // 任务列表组件
 <template>
   <div class="tasks">
-    <h2>任务列表</h2>
-    <!-- 引入弹窗组件，并监听弹窗中的确定事件 -->
-    <alert-pane
-      @itemclick="fclick"
-      :btntext="'+添加任务'"
-      :hint="'请输入任务内容'"
-    ></alert-pane>
+    <div class="title">
+      <h2>
+        <i class="iconfont">&#xe6f4;</i>
+        {{ pname }}
+        <span>-- 任务列表</span>
+        </h2>
+      <!-- 引入弹窗组件，并监听弹窗中的确定事件 -->
+      <alert-pane
+        @itemclick="fclick"
+        :btntext="'添加任务'"
+        :hint="'请输入任务内容'"
+      ></alert-pane>
+    </div>
     <div v-if="stasks[0]">
       <ul>
-        <li v-for="task in stasks" :key="task.id" :class="task.condition">
-          <div class="task">
+        <li v-for="task in stasks" :key="task.id">
+          <div :class="['task',task.condition]">
             <h3 @click="chose(task.id)" v-show="ischose != task.id">
               {{ task.title }}
             </h3>
@@ -24,12 +30,12 @@
               @blur="altertask(task, $event)"
               @keyup.enter="altertask(task, $event)"
             />
+            <span>{{ task.date }}</span>
             <button @click="done(task.id)" v-if="task.condition == 'todo'">
               完成
             </button>
             <button @click="toptask(task.id)">置顶</button>
             <button @click="deltask(task.id)">删除</button>
-            <span>{{ task.date }}</span>
           </div>
         </li>
       </ul>
@@ -56,14 +62,31 @@ export default {
       type: Number,
       default: 1,
     },
+    projects: {
+      type: Array,
+      default() {
+        return [];
+      },
+    },
   },
   data() {
     return {
+      sprojects: this.projects,
       stasks: this.tasks,
       pid: this.fpid,
       ischose: 0,
       focusstatus: false,
     };
+  },
+  computed: {
+    pname() {
+      let res = this.sprojects.filter((item) => item.id == this.pid)[0];
+      if (res) {
+        return  res.name;
+      } else {
+        return "";
+      }
+    },
   },
   watch: {
     tasks(val) {
@@ -71,6 +94,9 @@ export default {
     },
     fpid(val) {
       this.pid = val;
+    },
+    projects(val) {
+      this.sprojects = val;
     },
   },
   methods: {
@@ -154,7 +180,7 @@ export default {
         axios({
           method: "post",
           url: "http://127.0.0.1:5000/altertask",
-          data: { id: t.id , title:e.target.value},
+          data: { id: t.id, title: e.target.value },
         }).then((res) => {
           axios({
             method: "post",
@@ -180,8 +206,44 @@ export default {
 </script>
 
 <style scoped>
+.tasks {
+  width: 700px;
+  height: 600px;
+  background-color: rgb(247, 247, 247);
+  padding: 40px 20px;
+  box-sizing: border-box;
+  margin-top: 50px;
+}
+.title{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding-right: 20px;
+}
+.tasks .title h2 {
+  display: inline-block;
+  font-size: 32px;
+  font-weight: 900;
+}
+.title i{
+  font-size: 30px;
+  color: #4cbae9;
+  font-weight: 100;
+}
+.title span{
+  font-size: 20px;
+  font-weight: 500;
+
+}
+.task{
+  margin-top: 10px;
+  width: 650px;
+  height: 50px;
+  background-color: rgb(138, 230, 102);
+}
 .done {
   color: #ddd;
   text-decoration: line-through #333;
 }
+
 </style>

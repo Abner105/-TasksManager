@@ -1,7 +1,20 @@
 <template>
   <div class="projects">
-    <h2>项目列表</h2>
-    <div v-for="project in sprojects" :key="project.id">
+    <div class="logo">
+      <img src="../assets/logo.png" alt="" />
+      <span>Task Manager</span>
+    </div>
+    <div class="title">
+      <h2>项目列表</h2>
+      <!-- 引入弹窗组件，并监听弹窗中的确定事件 -->
+      <alert-pane @itemclick="fclick" :hint="'请输入项目名称'"></alert-pane>
+    </div>
+
+    <div
+      v-for="project in sprojects"
+      :key="project.id"
+      :class="{ active: project.id == spid, item: true }"
+    >
       <input
         type="text"
         :value="project.name"
@@ -13,20 +26,17 @@
       />
       <button
         v-show="!isalter || project.id != spid"
-        :class="{ active: project.id == spid }"
         @click="switchProject(project.id)"
       >
         {{ project.name }}
       </button>
-      <button v-show="project.id == spid" @click="getinput">修改</button>
-      <button @click="delproject(project.id)">删除</button>
+      <div @click="delproject(project.id)" class="iconfont icon-shanchu"></div>
+      <div
+        v-show="project.id == spid"
+        @click="getinput"
+        class="iconfont icon-cangpeitubiao_xiugaixiugaiziliao"
+      ></div>
     </div>
-    <!-- 引入弹窗组件，并监听弹窗中的确定事件 -->
-    <alert-pane
-      @itemclick="fclick"
-      :btntext="'+添加项目'"
-      :hint="'请输入项目名称'"
-    ></alert-pane>
   </div>
 </template>
 
@@ -86,7 +96,8 @@ export default {
           method: "post",
           url: "http://127.0.0.1:5000/getprojects",
         }).then((res) => {
-          this.sprojects = res.data;
+          // this.sprojects = res.data;
+          this.$emit("getproject", res.data);
         });
       });
     },
@@ -101,12 +112,13 @@ export default {
           method: "post",
           url: "http://127.0.0.1:5000/getprojects",
         }).then((res) => {
-          this.sprojects = res.data;
+          // this.sprojects = res.data;
+          this.$emit("getproject", res.data);
           if (this.spid == pid) {
             if (res.data[0]) {
               this.spid = res.data[0]["id"];
               this.$emit("refresh", this.spid);
-            }else{
+            } else {
               this.spid = 0;
               this.$emit("refresh", this.spid);
             }
@@ -136,7 +148,8 @@ export default {
             method: "post",
             url: "http://127.0.0.1:5000/getprojects",
           }).then((res) => {
-            this.sprojects = res.data;
+            // this.sprojects = res.data;
+            this.$emit("getproject", res.data);
           });
         });
       }
@@ -155,7 +168,68 @@ export default {
 </script>
 
 <style scoped>
+.projects {
+  width: 280px;
+  background-color: #ddd;
+}
+.logo {
+  /* background-color: aquamarine; */
+  width: 250px;
+  height: 50px;
+  padding: 30px 15px 10px;
+}
+.logo img {
+  height: 100%;
+}
+.logo span {
+  display: inline-block;
+  color: #4cbae9;
+  font-size: 28px;
+  vertical-align: top;
+  line-height: 50px;
+  font-weight: 900;
+}
+.title {
+  height: 50px;
+  padding: 5px 20px 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  line-height: 50px;
+}
+.title h2 {
+  font-size: 26px;
+  font-weight: 600;
+}
+.item {
+  display: block;
+  height: 60px;
+  padding: 0 20px;
+  margin: 8px 2px;
+}
+.item:hover {
+  background-color: rgb(247, 247, 247);
+}
+.item button,
+.item input {
+  display: inline-block;
+  height: 60px;
+  width: 175px;
+  font-size: 20px;
+  text-align: left;
+}
+.item div {
+  display: inline-block;
+  font-size: 20px;
+  height: 50px;
+  width: 30px;
+  line-height: 50px;
+  text-align: center;
+}
+.item div:hover {
+  color: #4cbae9;
+}
 .active {
-  background-color: aquamarine;
+  background-color: rgb(247, 247, 247);
 }
 </style>

@@ -4,8 +4,9 @@
       :projects="projects"
       :fpid="fpid"
       @refresh="fswitch"
+      @getproject="getp"
     ></project-list>
-    <task-list :fpid="fpid" :tasks="tasks"></task-list>
+    <task-list :fpid="fpid" :tasks="tasks" :projects="projects"></task-list>
   </div>
 </template>
 
@@ -38,6 +39,10 @@ export default {
         this.tasks = res.data;
       });
     },
+    getp(e){
+      this.projects=e
+    }
+
   },
   // 获取初始值
   created() {
@@ -65,23 +70,15 @@ export default {
 </script>
 
 <style>
-* {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  text-decoration: none;
-}
+@import url('./assets/reset.css');
+@import url('//at.alicdn.com/t/font_2891783_ll23ld0syb.css');
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin: 60px auto;
-  width: 500px;
-  height: 600px;
+  background-color: #fff;
+  margin: 20px auto;
+  width: 1000px;
+  height: 700px;
   display: flex;
   flex-direction: row;
-  justify-content: space-around;
+  justify-content: space-between;
 }
 </style>

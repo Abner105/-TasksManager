@@ -1,7 +1,7 @@
 // 弹窗组件
 <template>
   <div>
-    <button @click="show = true">{{ btntext }}</button>
+    <button @click="show = true" :class="['title','iconfont']">&#xe651; {{ btntext }}</button>
     <div class="wrapper" v-show="show">
       <div class="alertp">
         <h3>{{hint}}</h3>
@@ -26,7 +26,7 @@ export default {
   props: {
     btntext: {
       type: String,
-      default: "添加",
+      default: "",
     },
     hint: {
       type: String,
@@ -61,6 +61,16 @@ export default {
 </script>
 
 <style scoped>
+@import url('//at.alicdn.com/t/font_2891783_979wkmq3c87.css');
+
+.title{
+  display: inline-block;
+  color: #4cbae9;
+  font-size: 22px;
+  font-weight: 600;
+  vertical-align: middle;
+  padding: 10px;
+}
 .wrapper {
   position: fixed;
   top: 0;
