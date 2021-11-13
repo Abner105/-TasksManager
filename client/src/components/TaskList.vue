@@ -4,9 +4,9 @@
     <div class="title">
       <h2>
         <i class="iconfont">&#xe6f4;</i>
-        {{ pname }}
+        <h3>{{ pname }}</h3>
         <span>-- 任务列表</span>
-        </h2>
+      </h2>
       <!-- 引入弹窗组件，并监听弹窗中的确定事件 -->
       <alert-pane
         @itemclick="fclick"
@@ -15,10 +15,15 @@
       ></alert-pane>
     </div>
     <div v-if="stasks[0]">
-      <ul>
-        <li v-for="task in stasks" :key="task.id">
-          <div :class="['task',task.condition]">
-            <h3 @click="chose(task.id)" v-show="ischose != task.id">
+      <ul class="wrapper">
+        <li v-for="(task, i) in stasks" :key="task.id">
+          <div :class="['task', task.condition]">
+            <i :class="['iconfont', color(i)]">&#xe629;</i>
+            <h3
+              @click="chose(task.id)"
+              v-show="ischose != task.id"
+              :title="task.title"
+            >
               {{ task.title }}
             </h3>
             <input
@@ -31,22 +36,38 @@
               @keyup.enter="altertask(task, $event)"
             />
             <span>{{ task.date }}</span>
-            <button @click="done(task.id)" v-if="task.condition == 'todo'">
-              完成
+            <button @click="deltask(task.id)" class="iconfont del">
+              &#xe724;
             </button>
-            <button @click="toptask(task.id)">置顶</button>
-            <button @click="deltask(task.id)">删除</button>
+            <button
+              @click="toptask(task.id)"
+              class="iconfont top"
+              v-if="task.condition == 'todo'"
+            >
+              &#xe610;
+            </button>
+
+            <button
+              @click="done(task.id)"
+              v-if="task.condition == 'todo'"
+              class="iconfont complete"
+            >
+              &#xe64b;
+            </button>
           </div>
         </li>
       </ul>
     </div>
-    <div v-else>暂无数据</div>
+    <div v-else class="nothing">
+      <img src="../assets/nothing.png" alt="" />
+      <h3>暂 无 数 据 , 请 先 添 加 任 务</h3>
+    </div>
   </div>
 </template>
 
 <script>
-import axios from "axios";
 import AlertPane from "./AlertPane.vue";
+import { addTask, getTasks, done, delTask,topTask,alterTask } from "../network/api.js";
 export default {
   components: { AlertPane },
   name: "TaskList",
@@ -76,13 +97,14 @@ export default {
       pid: this.fpid,
       ischose: 0,
       focusstatus: false,
+      clist: ["pink", "blue", "orange", "green", "tomato"],
     };
   },
   computed: {
     pname() {
       let res = this.sprojects.filter((item) => item.id == this.pid)[0];
       if (res) {
-        return  res.name;
+        return res.name;
       } else {
         return "";
       }
@@ -100,66 +122,41 @@ export default {
     },
   },
   methods: {
-    // 监听弹窗中的确定事件,添加任务并刷新任务列表
+    // 圆环创建不同的颜色
+    color(i) {
+      if (i > 4) {
+        i = i % 5;
+      }
+      return this.clist[i];
+    },
+    // 添加任务并刷新任务列表(监听弹窗中的确定事件)
     fclick(title) {
-      axios({
-        method: "post",
-        url: "http://127.0.0.1:5000/addtask",
-        data: { title: title, pid: this.pid },
-      }).then((res) => {
-        axios({
-          method: "post",
-          url: "http://127.0.0.1:5000/gettasks",
-          data: { id: this.pid },
-        }).then((res) => {
+      addTask(title, this.pid).then(() => {
+        getTasks(this.pid).then((res) => {
           this.stasks = res.data;
         });
       });
     },
-    // 监听点击完成按钮，完成任务
+    // 完成任务(监听点击完成按钮)
     done(tid) {
-      axios({
-        method: "post",
-        url: "http://127.0.0.1:5000/done",
-        data: { id: tid, pid: this.pid },
-      }).then((res) => {
-        axios({
-          method: "post",
-          url: "http://127.0.0.1:5000/gettasks",
-          data: { id: this.pid },
-        }).then((res) => {
+      done(tid, this.pid).then(() => {
+        getTasks(this.pid).then((res) => {
           this.stasks = res.data;
         });
       });
     },
     // 删除任务
     deltask(tid) {
-      axios({
-        method: "post",
-        url: "http://127.0.0.1:5000/deltask",
-        data: { id: tid },
-      }).then((res) => {
-        axios({
-          method: "post",
-          url: "http://127.0.0.1:5000/gettasks",
-          data: { id: this.pid },
-        }).then((res) => {
+      delTask(tid).then(() => {
+        getTasks(this.pid).then((res) => {
           this.stasks = res.data;
         });
       });
     },
     // 置顶任务
     toptask(tid) {
-      axios({
-        method: "post",
-        url: "http://127.0.0.1:5000/toptask",
-        data: { id: tid, pid: this.pid },
-      }).then((res) => {
-        axios({
-          method: "post",
-          url: "http://127.0.0.1:5000/gettasks",
-          data: { id: this.pid },
-        }).then((res) => {
+      topTask(tid,this.pid).then(() => {
+        getTasks(this.pid).then((res) => {
           this.stasks = res.data;
         });
       });
@@ -176,23 +173,17 @@ export default {
     altertask(t, e) {
       this.ischose = 0;
       this.focusstatus = false;
+      // 如果值相等，不发送请求
       if (t.title != e.target.value) {
-        axios({
-          method: "post",
-          url: "http://127.0.0.1:5000/altertask",
-          data: { id: t.id, title: e.target.value },
-        }).then((res) => {
-          axios({
-            method: "post",
-            url: "http://127.0.0.1:5000/gettasks",
-            data: { id: this.pid },
-          }).then((res) => {
+        alterTask(t.id,e.target.value).then(() => {
+          getTasks(this.pid).then((res) => {
             this.stasks = res.data;
           });
         });
       }
     },
   },
+  // 自定义获取焦点属性
   directives: {
     focus: {
       update: function (el, { value }) {
@@ -209,41 +200,146 @@ export default {
 .tasks {
   width: 700px;
   height: 600px;
-  background-color: rgb(247, 247, 247);
-  padding: 40px 20px;
+  background-color: rgb(248, 248, 248);
+  padding: 40px 30px;
   box-sizing: border-box;
   margin-top: 50px;
 }
-.title{
+.title {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  padding-right: 20px;
+  padding: 0 0 10px 10px;
+  width: 630px;
+  /* background-color: antiquewhite; */
+}
+.title h3 {
+  display: inline-block;
+  max-width: 410px;
+  /* background-color: antiquewhite; */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .tasks .title h2 {
   display: inline-block;
-  font-size: 32px;
+  font-size: 24px;
   font-weight: 900;
 }
-.title i{
-  font-size: 30px;
+.title i {
+  font-size: 24px;
   color: #4cbae9;
   font-weight: 100;
+  /* vertical-align:top ; */
+  line-height: 38px;
 }
-.title span{
-  font-size: 20px;
+.title span {
+  font-size: 14px;
   font-weight: 500;
-
 }
-.task{
-  margin-top: 10px;
-  width: 650px;
+.wrapper {
+  height: 500px;
+  width: 665px;
+  overflow-y: auto;
+}
+.task {
+  margin-top: 12px;
+  width: 635px;
   height: 50px;
-  background-color: rgb(138, 230, 102);
+  background-color: rgb(235, 235, 235);
+  border-radius: 4px;
+  /* overflow-x:hidden; */
 }
-.done {
-  color: #ddd;
-  text-decoration: line-through #333;
+.task:hover {
+  /* background-color: #4cbae9; */
+  transform: translateY(-1px);
+  box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.3);
+  transition: 0.1s;
 }
-
+.task .pink {
+  color: pink;
+}
+.task .blue {
+  color: rgb(155, 155, 240);
+}
+.task .orange {
+  color: rgb(255, 194, 81);
+}
+.task .tomato {
+  color: tomato;
+}
+.task .green {
+  color: rgb(129, 255, 129);
+}
+.task .iconfont {
+  display: inline-block;
+  width: 30px;
+  height: 50px;
+  line-height: 50px;
+  padding-left: 15px;
+  font-size: 16px;
+  vertical-align: top;
+}
+.del:hover {
+  color: rgb(255, 74, 74);
+  font-weight: 900;
+}
+.top:hover {
+  color: #2ea5d8;
+  font-weight: 900;
+}
+.complete:hover {
+  color: rgb(85, 218, 24);
+  font-weight: 900;
+}
+.task .iconfont:first-child {
+  font-weight: 900;
+}
+.task h3,
+.task input {
+  display: inline-block;
+  width: 390px;
+  height: 50px;
+  font-size: 16px;
+  line-height: 50px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  /* margin: 0!important; */
+}
+/* .task h3{
+  overflow:hidden;
+} */
+.task span {
+  display: inline-block;
+  padding-right: 15px;
+  vertical-align: top;
+  line-height: 50px;
+  margin-left: 10px;
+}
+.task.done {
+  color: rgb(187, 187, 187);
+}
+.task.done .iconfont:first-child {
+  color: rgb(187, 187, 187);
+}
+.task.done h3 {
+  text-decoration: line-through rgb(116, 116, 116);
+}
+.nothing {
+  width: 450px;
+  height: 350px;
+  /* background-color: antiquewhite; */
+  margin: 30px auto;
+  text-align: center;
+}
+.nothing img {
+  width: 250px;
+  margin: 20px auto;
+  display: block;
+}
+.nothing h3 {
+  margin-top: 50px;
+  font-size: 16px;
+}
 </style>

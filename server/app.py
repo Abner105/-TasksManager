@@ -34,9 +34,10 @@ def forge():
     db.create_all()
     # 向项目表中插入数据
     projects=[
-        {'name':'项目1'},
-        {'name':'项目2'},
-        {'name':'项目3'},
+        {'name':'9月迭代'},
+        {'name':'miniERP迭代'},
+        {'name':'8月迭代'},
+        {'name':'7月实施迭代'},
     ]
     for p in projects:
         project = Projects(name=p['name'])
@@ -44,20 +45,23 @@ def forge():
     # 向任务表中插入数据
     n = datetime.datetime.now()
     tasks=[
-        {'title':'项目1-任务1','date':n,'condition':'todo','pid':1,'sort':2},
-        {'title':'项目1-任务2','date':n,'condition':'todo','pid':1,'sort':1},
-        {'title':'项目1-任务3','date':n,'condition':'done','pid':1,'sort':-1},
-        {'title':'项目1-任务4','date':n,'condition':'done','pid':1,'sort':-2},
-        {'title': '项目2-任务1', 'date': n, 'condition': 'todo', 'pid': 2,'sort':2},
-        {'title': '项目2-任务2', 'date': n, 'condition': 'todo', 'pid': 2,'sort':1},
-        {'title': '项目2-任务3', 'date': n, 'condition': 'done', 'pid': 2,'sort':-1},
-        {'title': '项目3-任务1', 'date': n, 'condition': 'done', 'pid': 3,'sort':-1},
+        {'title':'（蔡昕） 开启强制开票，商城默认展示含税价','date':n,'condition':'todo','pid':1,'sort':5},
+        {'title':'（蔡昕）【Bug转需求】组合促销按数量增加促销方式','date':n,'condition':'todo','pid':1,'sort':4},
+        {'title':'【新加需求】在销售订单中，增加重量字段的显示及打印--草原阿妈','date':n,'condition':'todo','pid':1,'sort':3},
+        {'title':'【订货+连接器】管家婆云进销存及网店版产品授权处理业务需求','date':n,'condition':'todo','pid':1,'sort':2},
+        {'title':'PC端商品选择>>买过商品页面的最后面，增加显示列【购买时间】','date':n,'condition':'todo','pid':1,'sort':1},
+        {'title':'订单查询>>导出明细时，在财务审核人字段右侧增加导出字段：审核时间，显示信息为：年月日时分秒','date':n,'condition':'done','pid':1,'sort':-1},
+        {'title':'（王芮）【Bug转需求】营销活动赠品，需要赠品池，设置客户自己选择领取哪些赠品（注：承诺客户10月底上线）','date':n,'condition':'done','pid':1,'sort':-2},
+        {'title': '（王芮）【Bug转需求】复制订单时，很多字段不能复制过来', 'date': n, 'condition': 'todo', 'pid': 2,'sort':2},
+        {'title': '【新加需求】打印电子面单后，将物流单号填入发货信息中', 'date': n, 'condition': 'todo', 'pid': 2,'sort':1},
+        {'title': '【新加需求】价格体系管理报表，【保存】操作增加提示信息。', 'date': n, 'condition': 'done', 'pid': 2,'sort':-1},
+        {'title': '（王芮）【企业微信】代下单选择商品时，多单位商品的每个辅助单位上，需要带出换算率', 'date': n, 'condition': 'done', 'pid': 3,'sort':-1},
     ]
     for t in tasks:
         task = Tasks(title=t['title'],date=t['date'],condition=t['condition'],pid=t['pid'],sort=t['sort'])
         db.session.add(task)
     db.session.commit()
-    click.echo('Done')
+    click.echo('初始化数据已完成')
 
 
 # 获取所有项目
@@ -86,7 +90,7 @@ def addproject():
         db.session.add(project)
         db.session.flush()
         pid = project.id
-        print(pid)
+        # print(pid)
         db.session.commit()
         res = make_response(json.dumps([{'id':pid}]))
     else:
