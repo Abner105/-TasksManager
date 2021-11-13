@@ -1,5 +1,25 @@
 # taskmgr
 
+# 后端
+```
+cd server
+```
+
+## 初始化数据
+```
+flask forge
+```
+
+## 启动后端服务
+```
+flask run 
+```
+
+# 前端
+```
+cd client
+```
+
 ## Project setup
 ```
 npm install
