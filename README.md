@@ -1,6 +1,6 @@
 # taskmgr
 
-# 后端
+## 后端
 ```
 cd server
 ```
@@ -15,7 +15,7 @@ flask forge
 flask run 
 ```
 
-# 前端
+## 前端
 ```
 cd client
 ```
