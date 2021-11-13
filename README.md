@@ -5,12 +5,12 @@
 cd server
 ```
 
-## 初始化数据
+### 初始化数据
 ```
 flask forge
 ```
 
-## 启动后端服务
+### 启动后端服务
 ```
 flask run 
 ```
@@ -20,7 +20,7 @@ flask run
 cd client
 ```
 
-## 安装依赖
+### 安装依赖
 ```
 npm install
 ```
