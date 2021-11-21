@@ -4,10 +4,12 @@ from flask import Flask,make_response,request
 from flask_sqlalchemy import SQLAlchemy
 
 import os,json,click
+# 实例化与配置
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+os.path.join(app.root_path,'taskmgr.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATION'] = False
+
 db = SQLAlchemy(app)
 
 

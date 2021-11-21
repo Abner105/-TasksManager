@@ -25,7 +25,7 @@ cd client
 npm install
 ```
 
-### 启动生产环境
+### 启动开发环境
 ```
 npm run serve
 ```
